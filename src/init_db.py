@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DB_NAME = "indie_game"
-SQL_FILE = "schema_mysql.sql"
-DATA_FILE = "sample_data_mysql.sql"
+SQL_FILE = "src/schema_mysql.sql"
+DATA_FILE = "src/sample_data_mysql.sql"
 
 config = {
     "user": os.getenv("MYSQL_USER"),
