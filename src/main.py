@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from src.init_db import config
 from pwdlib import PasswordHash
 import mysql.connector
+import uvicorn
 
 load_dotenv()
 
@@ -39,6 +40,19 @@ def read_game_using_id(item_id: int):
     cursor = connection.cursor(dictionary=True)
     try:
         cursor.execute("SELECT * FROM game where game_id = %s", (item_id,))
+        rows = cursor.fetchall()
+        return rows
+    except mysql.connector.Error as err:
+        connection.rollback()
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        cursor.close()
+
+@app.get("/developer/")
+def read_all_developer():
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT * FROM developer")
         rows = cursor.fetchall()
         return rows
     except mysql.connector.Error as err:
