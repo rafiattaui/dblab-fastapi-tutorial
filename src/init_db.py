@@ -18,7 +18,6 @@ config = {
 
 
 def database_or_tables_exist(connection, db_name):
-    """Checks if the database exists and returns (db_exists, list_of_tables)."""
     cursor = connection.cursor()
     try:
         cursor.execute(
