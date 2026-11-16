@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException, status, Response
+from fastapi import FastAPI, HTTPException, status, Response, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from src.init_db import config
@@ -8,7 +10,7 @@ import uvicorn
 
 load_dotenv()
 
-connection = mysql.connector.connect(database = "indie_game", **config)
+connection = mysql.connector.connect(database="indie_game", **config)
 password_hasher = PasswordHash.recommended()
 
 ### Route Models for Serialization
@@ -20,20 +22,45 @@ class CreateDeveloper(BaseModel):
 
 ### Route Logic
 app = FastAPI()
+templates = Jinja2Templates(directory="src/templates")
 
-@app.get("/games/")
-def read_all_games():
+# Helper function to avoid duplicating the SQL query logic
+def fetch_all_games_from_db():
     cursor = connection.cursor(dictionary=True)
     try:
         cursor.execute("SELECT * FROM game")
-        rows = cursor.fetchall()
-        return rows
+        return cursor.fetchall()
     except mysql.connector.Error as err:
         connection.rollback()
         raise HTTPException(status_code=500, detail=str(err))
     finally:
         cursor.close()
-        
+
+def fetch_all_developers_from_db():
+    cursor = connection.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT * FROM developer")
+        return cursor.fetchall()
+    except mysql.connector.Error as err:
+        connection.rollback()
+        raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        cursor.close()
+
+# Original JSON Route
+@app.get("/games/")
+def read_all_games():
+    return fetch_all_games_from_db()
+
+# New HTML Route
+@app.get("/html/games/", response_class=HTMLResponse)
+def read_all_games_html(request: Request):
+    rows = fetch_all_games_from_db()
+    return templates.TemplateResponse(
+        request=request, 
+        name="games.html", 
+        context={"games": rows}
+    )
 
 @app.get("/games/{item_id}")
 def read_game_using_id(item_id: int):
@@ -48,18 +75,20 @@ def read_game_using_id(item_id: int):
     finally:
         cursor.close()
 
+# Original JSON Route
 @app.get("/developer/")
 def read_all_developer():
-    cursor = connection.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT * FROM developer")
-        rows = cursor.fetchall()
-        return rows
-    except mysql.connector.Error as err:
-        connection.rollback()
-        raise HTTPException(status_code=500, detail=str(err))
-    finally:
-        cursor.close()
+    return fetch_all_developers_from_db()
+
+# New HTML Route
+@app.get("/html/developer/", response_class=HTMLResponse)
+def read_all_developer_html(request: Request):
+    rows = fetch_all_developers_from_db()
+    return templates.TemplateResponse(
+        request=request,
+        name="developers.html",
+        context={"developers": rows}
+    )
 
 @app.post("/add/developer/", status_code=status.HTTP_201_CREATED)
 def add_new_developer(body: CreateDeveloper):

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Indie Games</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 2rem; background-color: #f9fafb; }
+        h1 { color: #111827; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #f3f4f6; font-weight: 600; color: #374151; text-transform: capitalize; }
+        tr:hover { background-color: #f9fafb; }
+    </style>
+</head>
+<body>
+    <h1>Indie Games Catalog</h1>
+
+    {% if games %}
+        <table>
+            <thead>
+                <tr>
+                    <!-- Automatically creates headers from your SQL column names -->
+                    {% for key in games[0].keys() %}
+                        <th>{{ key.replace('_', ' ') }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in games %}
+                    <tr>
+                        {% for value in game.values() %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No games found in the database.</p>
+    {% endif %}
+</body>
+</html>
