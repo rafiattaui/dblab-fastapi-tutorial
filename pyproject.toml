@@ -7,5 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi[all]>=0.163.1",
     "mysql-connector-python>=26.10.0",
+    "pwdlib[argon2]>=0.4.2",
     "python-dotenv>=1.2.4",
 ]
