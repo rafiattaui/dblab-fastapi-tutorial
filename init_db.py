@@ -7,6 +7,7 @@ load_dotenv()
 
 DB_NAME = "indie_game"
 SQL_FILE = "schema_mysql.sql"
+DATA_FILE = "sample_data_mysql.sql"
 
 config = {
     "user": os.getenv("MYSQL_USER"),
@@ -97,11 +98,31 @@ def create_tables(connection, sql_file):
     finally:
         cursor.close()
 
+def add_sample_data(connection, data_file):
+    cursor = connection.cursor()
+    with open(data_file, "r", encoding="utf-8") as file:
+        data_script = file.read()
+    try:
+        cursor.execute(data_script)
+        
+        for result_set in cursor.fetchsets():
+            if result_set:
+                print(f"Rows returned: {result_set}")
+
+        connection.commit()
+        print("SQL file executed successfully.")
+    except mysql.connector.Error as err:
+        print(f"Error executing SQL file: {err}")
+        connection.rollback()
+    finally:
+        cursor.close()
+
 
 if __name__ == "__main__":
     connection = mysql.connector.connect(**config)
     try:
         setup_database(connection, DB_NAME)
         create_tables(connection, SQL_FILE)
+        add_sample_data(connection, DATA_FILE)
     finally:
         connection.close()
