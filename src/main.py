@@ -1,12 +1,12 @@
-from fastapi import FastAPI, HTTPException, status, Response, Request
+import mysql.connector
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-from dotenv import load_dotenv
-from src.init_db import config
 from pwdlib import PasswordHash
-import mysql.connector
-import uvicorn
+from pydantic import BaseModel
+
+from src.init_db import config
 
 load_dotenv()
 
